@@ -1,0 +1,87 @@
+/* ================= BACKGROUND ================= */
+
+body:not(.dark-mode) {
+  background: linear-gradient(135deg, #6fbff0, #1629c0);
+  background-attachment: fixed;
+}
+
+
+/* ================= BLOG LAYOUT ================= */
+
+.blog-container {
+  margin-top: 100px;
+}
+
+.blog-card {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+}
+
+
+/* ================= BLOG CONTENT ================= */
+
+.blog-meta {
+  font-size: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.blog-preview {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+
+/* ================= CREATE POST ================= */
+
+body.dark-mode .create-post {
+  color: #fff;
+}
+
+
+/* ================= LIGHT MODE ================= */
+
+body:not(.dark-mode) .blog-card {
+  background: rgba(255, 255, 255, 0.95);
+  color: #212529;
+}
+
+body:not(.dark-mode) .blog-card h5,
+body:not(.dark-mode) .blog-card p,
+body:not(.dark-mode) .blog-card small {
+  color: #212529;
+}
+
+
+/* ================= DARK MODE ================= */
+
+body.dark-mode .blog-card {
+  background: rgba(30, 30, 30, 0.6);
+  color: #fff;
+}
+
+body.dark-mode .blog-card h5,
+body.dark-mode .blog-card p,
+body.dark-mode .blog-card small {
+  color: #fff;
+}
+
+
+/* ================= COMMENTS ================= */
+
+.comment {
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.comment small {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}

@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    pswrd VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS aircraft_gallery (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    manufacturer VARCHAR(255),
+    image_url TEXT NOT NULL,
+    description TEXT,
+    category VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  author VARCHAR(100) DEFAULT 'Admin',
+  image_url TEXT,
+  category VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE comments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  post_id BIGINT UNSIGNED,
+  author VARCHAR(100),
+  content TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE
+);
+
+SHOW CREATE TABLE comments;
+
+ALTER TABLE users ADD UNIQUE (username);

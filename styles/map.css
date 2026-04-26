@@ -1,0 +1,93 @@
+/* ================= MAP ================= */
+
+#map {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+
+/* ================= CONTROLS PANEL ================= */
+
+.controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: rgba(153, 153, 153, 0.88);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+body.dark-mode .controls {
+  background: rgba(100, 100, 100, 0.88);
+}
+
+
+/* Toggle button */
+.toggle-btn {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
+/* Expand / collapse animation */
+#controlsContent {
+  transition: 0.3s ease;
+  overflow: hidden;
+}
+
+.controls.collapsed #controlsContent {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+}
+
+.controls:not(.collapsed) #controlsContent {
+  max-height: 300px;
+  opacity: 1;
+}
+
+
+/* ================= TRACKER ================= */
+
+.tracker {
+  position: fixed;
+  top: 70px;
+  left: 15px;
+  width: 180px;
+  z-index: 2000;
+}
+
+body.dark-mode .tracker {
+  color: #fff;
+}
+
+
+/* ================= DETAILS PANEL ================= */
+
+.details {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 2000;
+}
+
+body.dark-mode .details {
+  color: #000;
+}
+
+body.dark-mode .details p {
+  color: #808080;
+}

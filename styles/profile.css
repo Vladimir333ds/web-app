@@ -1,0 +1,72 @@
+/* ================= BACKGROUND ================= */
+
+body:not(.dark-mode) {
+  background: linear-gradient(135deg, #6fbff0, #1629c0);
+  background-attachment: fixed;
+}
+
+
+/* ================= PROFILE SIDEBAR ================= */
+
+.profile-sidebar {
+  min-height: 100vh;
+  backdrop-filter: blur(10px);
+}
+
+.profile-sidebar .list-group-item {
+  border: none;
+  margin-bottom: 5px;
+  border-radius: 10px;
+}
+
+
+/* ================= COMMENTS ================= */
+
+.comments-wrapper {
+  max-width: 700px;
+}
+
+.comment-card {
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: 0.2s;
+}
+
+.comment-card:hover {
+  transform: translateY(-2px);
+}
+
+body.dark-mode .comment {
+  color: #000;
+}
+
+
+/* Clickable comment behavior */
+.clickable-comment {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.clickable-comment:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ================= POSTS ================= */
+
+.clickable-post {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.clickable-post:hover {
+  transform: translateY(-3px);
+}
+
+
+/* ================= DARK MODE FIXES ================= */
+
+body.dark-mode .card {
+  color: #fff;
+}

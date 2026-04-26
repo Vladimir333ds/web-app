@@ -1,0 +1,99 @@
+/* ================= DARK MODE BASE ================= */
+
+body.dark-mode {
+  background: linear-gradient(45deg, #090625, #272c84, #090625);
+  background-size: 300% 300%;
+  animation: gradientMove 30s ease infinite;
+  background-attachment: fixed;
+  color: #fff;
+}
+
+
+/* ================= NAVBAR ================= */
+
+body.dark-mode .navbar {
+  background: linear-gradient(135deg, #090625, #272c84) !important;
+}
+
+body.dark-mode .navbar .nav-link,
+body.dark-mode .navbar .navbar-brand {
+  color: #ffffffb4;
+}
+
+body.dark-mode .navbar .nav-link.active {
+  color: #fff;
+}
+
+
+/* ================= CARDS ================= */
+
+body.dark-mode .card {
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(14px);
+}
+
+
+/* ================= INPUTS ================= */
+
+body.dark-mode input {
+  color: #fff;
+  border-color: #444;
+}
+
+body.dark-mode .form-control {
+  background: #222;
+  color: #fff;
+  border-color: #444;
+}
+
+body.dark-mode .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 1;
+}
+
+
+/* ================= MODALS ================= */
+
+body.dark-mode .modal-content {
+  background: linear-gradient(135deg, #090625, #272c84);
+  color: #fff;
+}
+
+body.dark-mode .btn-close {
+  color: #fff;
+  background-color: rgba(8, 0, 116, 0.301);
+}
+
+/* Username modal inputs */
+body.dark-mode #editUsernameModal .form-control {
+  color: #fff;
+}
+
+body.dark-mode #editUsernameModal .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Password modal inputs */
+body.dark-mode #editPasswordModal .form-control {
+  color: #fff;
+}
+
+body.dark-mode #editPasswordModal .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+
+/* ================= TEXT FIXES ================= */
+
+body.dark-mode .user-greeting {
+  color: #fff;
+}
+
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes gradientMove {
+  0%   { background-position: 0% 100%; }
+  50%  { background-position: 100% 0%; }
+  100% { background-position: 0% 100%; }
+}
