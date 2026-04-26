@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://web-app-p5sr.onrender.com";
 
 // ================= GLOBAL STATE =================
 let allAircraft = [];
