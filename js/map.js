@@ -142,7 +142,7 @@ async function searchAircraft() {
 
   try {
     const res = await fetch(
-      `http://localhost:3000/aircraft-live/${selectedLat}/${selectedLon}/${rangeSet.value}`
+      `https://web-app-p5sr.onrender.com/aircraft-live/${selectedLat}/${selectedLon}/${rangeSet.value}`
     );
 
     const aircraft = await res.json();

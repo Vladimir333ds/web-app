@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadMyPosts() {
   const username = getUsernameFromToken();
 
-  const res = await fetch("http://localhost:3000/blog-posts");
+  const res = await fetch("https://web-app-p5sr.onrender.com/blog-posts");
   const posts = await res.json();
 
   const myPosts = posts.filter(p => p.author === username);
@@ -92,7 +92,7 @@ container.innerHTML = myPosts.map(p => `
 }
 
 async function openEditPost(postId) {
-  const res = await fetch("http://localhost:3000/blog-posts");
+  const res = await fetch("https://web-app-p5sr.onrender.com/blog-posts");
   const posts = await res.json();
 
   const post = posts.find(p => p.id == postId);
@@ -116,8 +116,8 @@ async function openEditPost(postId) {
 async function openPostFromComment(postId, commentId) {
   try {
     const [postsRes, commentsRes] = await Promise.all([
-      fetch("http://localhost:3000/blog-posts"),
-      fetch("http://localhost:3000/comments-all")
+      fetch("https://web-app-p5sr.onrender.com/blog-posts"),
+      fetch("https://web-app-p5sr.onrender.com/comments-all")
     ]);
 
     const posts = await postsRes.json();
@@ -154,7 +154,7 @@ async function openPostFromComment(postId, commentId) {
 async function loadMyComments() {
   const username = getUsernameFromToken();
 
-  const res = await fetch("http://localhost:3000/comments-all");
+  const res = await fetch("https://web-app-p5sr.onrender.com/comments-all");
   const comments = await res.json();
 
   const myComments = comments.filter(c => c.author === username);
@@ -188,7 +188,7 @@ async function loadMyComments() {
 async function deleteComment(commentId) {
   if (!confirm("Delete this comment?")) return;
 
-  const res = await fetch(`http://localhost:3000/delete-comment/${commentId}`, {
+  const res = await fetch(`https://web-app-p5sr.onrender.com/delete-comment/${commentId}`, {
     method: "DELETE",
     headers: {
       "Authorization": "Bearer " + getToken()
@@ -204,7 +204,7 @@ async function deleteComment(commentId) {
 let currentEditPostId = null;
 
 async function openMyPost(postId) {
-  const res = await fetch("http://localhost:3000/blog-posts");
+  const res = await fetch("https://web-app-p5sr.onrender.com/blog-posts");
   const posts = await res.json();
 
   const post = posts.find(p => p.id == postId);
@@ -231,7 +231,7 @@ async function saveEdit() {
   const title = document.getElementById("editTitle").value.trim();
   const content = document.getElementById("editContent").value.trim();
 
-  const res = await fetch(`http://localhost:3000/edit-post/${currentEditPostId}`, {
+  const res = await fetch(`https://web-app-p5sr.onrender.com/edit-post/${currentEditPostId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -250,7 +250,7 @@ async function saveEdit() {
 async function deletePost(postId) {
   if (!confirm("Delete post?")) return;
 
-  const res = await fetch(`http://localhost:3000/delete-post/${postId}`, {
+  const res = await fetch(`https://web-app-p5sr.onrender.com/delete-post/${postId}`, {
     method: "DELETE",
     headers: {
       "Authorization": "Bearer " + getToken()
@@ -268,9 +268,9 @@ async function loadProfileStats() {
   const username = getUsernameFromToken();
 
   const [postsRes, commentsRes, userRes] = await Promise.all([
-    fetch("http://localhost:3000/blog-posts"),
-    fetch("http://localhost:3000/comments-all"),
-    fetch("http://localhost:3000/me", {
+    fetch("https://web-app-p5sr.onrender.com/blog-posts"),
+    fetch("https://web-app-p5sr.onrender.com/comments-all"),
+    fetch("https://web-app-p5sr.onrender.com/me", {
       headers: { "Authorization": "Bearer " + getToken() }
     })
   ]);
@@ -293,7 +293,7 @@ async function loadProfileStats() {
 async function submitUsernameChange() {
   const newUsername = document.getElementById("newUsernameInput").value.trim();
 
-  const res = await fetch("http://localhost:3000/edit-username", {
+  const res = await fetch("https://web-app-p5sr.onrender.com/edit-username", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -315,7 +315,7 @@ async function submitPasswordChange() {
   const currentPassword = document.getElementById("currentPasswordInput").value;
   const newPassword = document.getElementById("newPasswordInput").value;
 
-  const res = await fetch("http://localhost:3000/edit-password", {
+  const res = await fetch("https://web-app-p5sr.onrender.com/edit-password", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -336,7 +336,7 @@ async function submitPasswordChange() {
 async function deleteAccount() {
   if (!confirm("Delete account permanently?")) return;
 
-  const res = await fetch("http://localhost:3000/delete-account", {
+  const res = await fetch("https://web-app-p5sr.onrender.com/delete-account", {
     method: "DELETE",
     headers: {
       "Authorization": "Bearer " + getToken()
