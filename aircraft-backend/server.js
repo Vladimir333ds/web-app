@@ -138,10 +138,27 @@ app.get("/aircraft-live/:lat/:lon/:range", async (req, res) => {
       `https://api.adsb.lol/v2/point/${lat}/${lon}/${radiusNm}`,
       { headers: { Accept: "application/json", "User-Agent": "AircraftTracker/1.0 (+https://github.com/Vladimir333ds/web-app)" } }
     );
-    const data = await response.json();
+    const body = await response.text();
+    let data;
+
+    try {
+      if (!body.trim()) throw new Error("empty response");
+      data = JSON.parse(body);
+    } catch {
+      console.error(
+        `ADSB.lol response: HTTP ${response.status}, ` +
+        `content-type ${response.headers.get("content-type") || "unknown"}, ` +
+        `body: ${body.slice(0, 500) || "(empty)"}`
+      );
+      return res.status(502).json({
+        error: `Aircraft provider returned an invalid response (HTTP ${response.status})`
+      });
+    }
+
     if (!response.ok) {
-      return res.status(response.status).json({
-        error: data?.detail || data?.message || `ADSB.lol returned HTTP ${response.status}`
+      console.error(`ADSB.lol returned HTTP ${response.status}:`, body.slice(0, 500));
+      return res.status(502).json({
+        error: `Aircraft provider returned HTTP ${response.status}`
       });
     }
     const aircraft = Array.isArray(data?.ac) ? data.ac : [];
