@@ -14,8 +14,8 @@ app.use(express.static("public"));
 
 const SECRET = "supersecretkey";
 
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+const fetch = globalThis.fetch || ((...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args)));
 
 // ================= DATABASE =================
 const db = mysql.createConnection({
@@ -35,10 +35,6 @@ db.connect(err => {
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
 
 // ================= AUTH MIDDLEWARE =================
 function authMiddleware(req, res, next) {
@@ -127,17 +123,46 @@ app.get("/me", authMiddleware, (req, res) => {
 
 app.get("/aircraft-live/:lat/:lon/:range", async (req, res) => {
   try {
-    const { lat, lon, range } = req.params;
+    const lat = Number(req.params.lat);
+    const lon = Number(req.params.lon);
+    const rangeKm = Number(req.params.range);
+    if (!Number.isFinite(lat) || lat < -90 || lat > 90 ||
+        !Number.isFinite(lon) || lon < -180 || lon > 180 ||
+        !Number.isFinite(rangeKm) || rangeKm <= 0) {
+      return res.status(400).json({ error: "Invalid latitude, longitude, or range" });
+    }
 
+    // ADSB.lol's point endpoint takes nautical miles and caps radius at 250 nm.
+    const radiusNm = Math.min(250, Math.max(1, Math.round(rangeKm / 1.852)));
     const response = await fetch(
-      `https://api.facha.dev/v1/aircraft/live/range/${lat}/${lon}/${range}`
+      `https://api.adsb.lol/v2/point/${lat}/${lon}/${radiusNm}`,
+      { headers: { Accept: "application/json" } }
     );
-
     const data = await response.json();
-    res.json(data);
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data?.detail || data?.message || `ADSB.lol returned HTTP ${response.status}`
+      });
+    }
+    const aircraft = Array.isArray(data?.ac) ? data.ac : [];
+    res.json({
+      total: Number.isFinite(data?.total) ? data.total : aircraft.length,
+      aircraft: aircraft.filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon)).map(p => ({
+        icao: p.hex || "",
+        callsign: p.flight?.trim() || "",
+        lat: p.lat,
+        lon: p.lon,
+        heading: p.track ?? p.true_heading ?? 0,
+        baroAltitude: p.alt_baro,
+        speed: p.gs,
+        reg: p.r,
+        type: p.t
+      }))
+    });
 
   } catch (err) {
-    res.status(500).send("API error");
+    console.error("Aircraft provider request failed:", err.message);
+    res.status(502).json({ error: "Unable to reach the aircraft data provider" });
   }
 });
 
@@ -326,6 +351,6 @@ app.delete("/delete-account", authMiddleware, (req, res) => {
 });
 
 // ================= SERVER START =================
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });

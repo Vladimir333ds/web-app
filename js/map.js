@@ -9,11 +9,13 @@ map.setMaxBounds(bounds);
 
 // ================= TILE LAYERS =================
 const lightTiles = L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(window.APP_CONFIG?.cartoBasemapKey || "")}`,
+  { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }
 );
 
 const darkTiles = L.tileLayer(
-  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+  `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(window.APP_CONFIG?.cartoBasemapKey || "")}`,
+  { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' }
 );
 
 function initMapTheme() {
@@ -89,6 +91,9 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  const total = document.getElementById("total");
+  if (total) total.textContent = "Choose an area to see aircraft";
+
   // Search button
   const searchBtn = document.getElementById("search");
   if (searchBtn) {
@@ -115,7 +120,7 @@ map.on("click", (e) => {
 
 // ================= RANGE CIRCLE =================
 function drawRangeCircle() {
-  if (!selectedLat || !selectedLon || !rangeSet) return;
+  if (selectedLat === null || selectedLon === null || !rangeSet) return;
 
   const radiusMeters = rangeSet.value * 1000;
 
@@ -133,7 +138,7 @@ function drawRangeCircle() {
 // ================= AIRCRAFT SEARCH =================
 
 async function searchAircraft() {
-  if (!selectedLat || !selectedLon) {
+  if (selectedLat === null || selectedLon === null) {
     alert("Select location first");
     return;
   }
@@ -141,14 +146,17 @@ async function searchAircraft() {
   aircraftLayer.clearLayers();
 
   try {
+    const apiBase = (window.APP_CONFIG?.aircraftApiBase || "https://web-app-p5sr.onrender.com").replace(/\/$/, "");
     const res = await fetch(
-      `https://web-app-p5sr.onrender.com/aircraft-live/${selectedLat}/${selectedLon}/${rangeSet.value}`
+      `${apiBase}/aircraft-live/${selectedLat}/${selectedLon}/${rangeSet.value}`
     );
-
-    const aircraft = await res.json();
+    const payload = await res.json();
+    if (!res.ok) throw new Error(payload.error || `Aircraft API returned HTTP ${res.status}`);
+    const aircraft = Array.isArray(payload) ? payload : payload.aircraft;
+    if (!Array.isArray(aircraft)) throw new Error("Aircraft API returned an unexpected response");
 
     aircraft.forEach((plane) => {
-      if (!plane.lat || !plane.lon) return;
+      if (plane.lat == null || plane.lon == null) return;
 
       const marker = L.marker([plane.lat, plane.lon], {
         icon: planeIcon,
@@ -172,11 +180,16 @@ async function searchAircraft() {
       });
     });
 
+    const total = document.getElementById("total");
+    const reportedTotal = Number.isFinite(payload?.total) ? payload.total : aircraft.length;
+    if (total) total.textContent = `${reportedTotal} in selected area`;
     showToast(`Loaded ${aircraft.length} aircraft`);
 
   } catch (err) {
     console.error(err);
-    showToast("Failed to load aircraft");
+    const total = document.getElementById("total");
+    if (total) total.textContent = "Aircraft data unavailable";
+    showToast(err.message || "Failed to load aircraft");
   }
 }
 
