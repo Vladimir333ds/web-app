@@ -136,7 +136,7 @@ app.get("/aircraft-live/:lat/:lon/:range", async (req, res) => {
     const radiusNm = Math.min(250, Math.max(1, Math.round(rangeKm / 1.852)));
     const response = await fetch(
       `https://api.adsb.lol/v2/point/${lat}/${lon}/${radiusNm}`,
-      { headers: { Accept: "application/json" } }
+      { headers: { Accept: "application/json", "User-Agent": "AircraftTracker/1.0 (+https://github.com/Vladimir333ds/web-app)" } }
     );
     const data = await response.json();
     if (!response.ok) {
