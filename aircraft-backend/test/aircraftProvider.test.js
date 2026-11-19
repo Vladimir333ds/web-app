@@ -47,3 +47,27 @@ test("provider converts upstream rate limiting into a retry-aware error", async 
     error => error instanceof ProviderError && error.status === 503 && error.retryAfter === "60"
   );
 });
+
+test("provider logs transport codes without exposing the underlying error message", async () => {
+  const originalWarn = console.warn;
+  let logged;
+  console.warn = (...args) => { logged = args; };
+  const provider = new AircraftProvider({
+    fetchImpl: async () => {
+      const error = new TypeError("sensitive details must not be logged");
+      error.cause = Object.assign(new Error("private cause"), { code: "ENOTFOUND" });
+      throw error;
+    }
+  });
+  try {
+    await assert.rejects(
+      provider.findByPoint(50, 8, 25),
+      error => error instanceof ProviderError && error.status === 503
+    );
+    assert.equal(logged[0], "ADSB.lol network request failed");
+    assert.deepEqual(logged[1], { name: "TypeError", code: "", causeCode: "ENOTFOUND" });
+    assert.equal(JSON.stringify(logged).includes("sensitive details"), false);
+  } finally {
+    console.warn = originalWarn;
+  }
+});

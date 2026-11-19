@@ -58,6 +58,12 @@ class AircraftProvider {
         }
       );
     } catch (error) {
+      // Log transport classification only; never log headers, API keys, or coordinates.
+      console.warn("ADSB.lol network request failed", {
+        name: error?.name || "Error",
+        code: error?.code || "",
+        causeCode: error?.cause?.code || error?.cause?.name || ""
+      });
       throw new ProviderError("Unable to reach the aircraft data provider", { status: 503 });
     }
 
