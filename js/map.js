@@ -122,7 +122,7 @@ map.on("click", (e) => {
 function drawRangeCircle() {
   if (selectedLat === null || selectedLon === null || !rangeSet) return;
 
-  const radiusMeters = rangeSet.value * 1000;
+  const radiusMeters = AircraftApiClient.nauticalMilesToMeters(rangeSet.value);
 
   if (rangeCircle) {
     map.removeLayer(rangeCircle);
@@ -146,14 +146,9 @@ async function searchAircraft() {
   aircraftLayer.clearLayers();
 
   try {
-    const apiBase = (window.APP_CONFIG?.aircraftApiBase || "https://web-app-p5sr.onrender.com").replace(/\/$/, "");
-    const res = await fetch(
-      `${apiBase}/aircraft-live/${selectedLat}/${selectedLon}/${rangeSet.value}`
-    );
-    const payload = await res.json();
-    if (!res.ok) throw new Error(payload.error || `Aircraft API returned HTTP ${res.status}`);
-    const aircraft = Array.isArray(payload) ? payload : payload.aircraft;
-    if (!Array.isArray(aircraft)) throw new Error("Aircraft API returned an unexpected response");
+    const client = new AircraftApiClient({ baseUrl: window.APP_CONFIG?.aircraftApiBase });
+    const payload = await client.search(selectedLat, selectedLon, rangeSet.value);
+    const aircraft = payload.aircraft;
 
     aircraft.forEach((plane) => {
       if (plane.lat == null || plane.lon == null) return;
@@ -164,10 +159,10 @@ async function searchAircraft() {
       }).addTo(aircraftLayer);
 
       marker.bindPopup(`
-        <strong>${plane.callsign || "Unknown"}</strong><br>
-        Altitude: ${plane.baroAltitude ?? "N/A"} ft<br>
+        <strong>${escapeHtml(plane.markerLabel)}</strong><br>
+        Altitude: ${escapeHtml(plane.baroAltitude ?? "N/A")} ft<br>
 
-        <button class="btn btn-sm btn-primary w-100 mt-2" id="details-${plane.icao}">
+        <button class="btn btn-sm btn-primary w-100 mt-2" id="details-${escapeHtml(plane.icao)}">
           <i class="bi bi-info-circle"></i> View Details
         </button>
       `);
@@ -181,12 +176,12 @@ async function searchAircraft() {
     });
 
     const total = document.getElementById("total");
-    const reportedTotal = Number.isFinite(payload?.total) ? payload.total : aircraft.length;
+    const reportedTotal = Number.isFinite(payload.total) ? payload.total : aircraft.length;
     if (total) total.textContent = `${reportedTotal} in selected area`;
     showToast(`Loaded ${aircraft.length} aircraft`);
 
   } catch (err) {
-    console.error(err);
+    console.error("Aircraft search failed:", err.message);
     const total = document.getElementById("total");
     if (total) total.textContent = "Aircraft data unavailable";
     showToast(err.message || "Failed to load aircraft");
@@ -199,12 +194,12 @@ function openDetails(plane) {
   const content = document.getElementById("detailsContent");
 
   content.innerHTML = `
-    <p><strong>Callsign:</strong> ${plane.callsign || "N/A"}</p>
-    <p><strong>ICAO:</strong> ${plane.icao}</p>
-    <p><strong>Registration:</strong> ${plane.reg || "N/A"}</p>
-    <p><strong>Type:</strong> ${plane.type || "Unknown"}</p>
-    <p><strong>Altitude:</strong> ${plane.baroAltitude ?? "N/A"} ft</p>
-    <p><strong>Speed:</strong> ${plane.speed ?? "N/A"} kt</p>
+    <p><strong>Callsign:</strong> ${escapeHtml(plane.callsign || "N/A")}</p>
+    <p><strong>ICAO:</strong> ${escapeHtml(plane.icao)}</p>
+    <p><strong>Registration:</strong> ${escapeHtml(plane.reg || "N/A")}</p>
+    <p><strong>Type:</strong> ${escapeHtml(plane.type || "Unknown")}</p>
+    <p><strong>Altitude:</strong> ${escapeHtml(plane.baroAltitude ?? "N/A")} ft</p>
+    <p><strong>Speed:</strong> ${escapeHtml(plane.speed ?? "N/A")} kt</p>
   `;
 
   details.classList.remove("hidden");

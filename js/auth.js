@@ -56,7 +56,7 @@ async function login() {
   }
 
   try {
-    const res = await fetch("https://web-app-p5sr.onrender.com/login", {
+    const res = await fetch(apiUrl("login"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -96,7 +96,7 @@ async function signup() {
   }
 
   try {
-    const res = await fetch("https://web-app-p5sr.onrender.com/signup", {
+    const res = await fetch(apiUrl("signup"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -121,7 +121,7 @@ async function signup() {
 
 // ================= AUTO LOGIN AFTER SIGNUP =================
 async function loginAfterSignup(username, password) {
-  const res = await fetch("https://web-app-p5sr.onrender.com/login", {
+  const res = await fetch(apiUrl("login"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -169,7 +169,7 @@ function renderAuthUI() {
 
   if (user) {
     authArea.innerHTML = `
-      <span class="me-2 fw-semibold user-greeting">Hello, ${user}</span>
+      <span class="me-2 fw-semibold user-greeting">Hello, ${escapeHtml(user)}</span>
       <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
     `;
   } else {

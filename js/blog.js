@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const BASE_URL = "https://web-app-p5sr.onrender.com";
+const BASE_URL = window.API_BASE;
 
 let allPosts = [];
 let currentPostId = null;
@@ -35,21 +35,21 @@ function displayPosts(posts) {
     <div class="blog-card" onclick="openPost(${index})">
       
       <h5 class="blog-title">
-        <i class="bi bi-file-text"></i> ${post.title}
+        <i class="bi bi-file-text"></i> ${escapeHtml(post.title)}
       </h5>
       
       <div class="blog-meta">
         <span>
-          <i class="bi bi-person-circle"></i> ${post.author}
+          <i class="bi bi-person-circle"></i> ${escapeHtml(post.author)}
         </span>
 
         <span class="badge">
-          <i class="bi bi-tag"></i> ${post.category}
+          <i class="bi bi-tag"></i> ${escapeHtml(post.category)}
         </span>
       </div>
 
       <p class="blog-preview">
-        ${post.content.substring(0, 120)}...
+        ${escapeHtml(post.content.substring(0, 120))}...
       </p>
 
     </div>
@@ -79,13 +79,13 @@ function openPost(index) {
   document.getElementById("postTitle").textContent = post.title;
 
   document.getElementById("postMeta").innerHTML = `
-    <i class="bi bi-person-circle"></i> ${post.author}
+    <i class="bi bi-person-circle"></i> ${escapeHtml(post.author)}
     &nbsp; • &nbsp;
-    <i class="bi bi-tag"></i> ${post.category}
+    <i class="bi bi-tag"></i> ${escapeHtml(post.category)}
   `;
 
   document.getElementById("postContent").innerHTML =
-    post.content.replace(/\n/g, "<br>");
+    escapeHtml(post.content).replace(/\n/g, "<br>");
 
   // Handle image
   const img = document.getElementById("postImage");
@@ -136,8 +136,8 @@ async function loadComments(postId) {
         <div class="comment mb-2 p-2 d-flex justify-content-between align-items-start">
 
           <div>
-            <strong>${c.author}</strong>
-            <p class="mb-1">${c.content}</p>
+            <strong>${escapeHtml(c.author)}</strong>
+            <p class="mb-1">${escapeHtml(c.content)}</p>
 
             ${isOwner ? `
               <button class="btn btn-sm btn-danger mt-1"

@@ -1,5 +1,5 @@
 // ================= CONFIG =================
-const BASE_URL = "https://web-app-p5sr.onrender.com";
+const BASE_URL = window.API_BASE;
 
 // ================= GLOBAL STATE =================
 let allAircraft = [];
@@ -43,15 +43,15 @@ function displayAircraft(data) {
       <div class="card h-100 shadow-sm clickable-card"
            onclick="openImageModal(${index})">
 
-        <img src="${BASE_URL}${plane.image_url}" 
+        <img src="${escapeHtml(BASE_URL + plane.image_url)}"
              class="card-img-top" 
-             alt="${plane.name}">
+             alt="${escapeHtml(plane.name)}">
 
         <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${plane.name}</h5>
-          <small class="mb-2 card-manufacturer">${plane.manufacturer}</small>
-          <p class="card-text small flex-grow-1">${plane.description}</p>
-          <span class="badge category-pill">${plane.category}</span>
+          <h5 class="card-title">${escapeHtml(plane.name)}</h5>
+          <small class="mb-2 card-manufacturer">${escapeHtml(plane.manufacturer)}</small>
+          <p class="card-text small flex-grow-1">${escapeHtml(plane.description)}</p>
+          <span class="badge category-pill">${escapeHtml(plane.category)}</span>
         </div>
 
       </div>

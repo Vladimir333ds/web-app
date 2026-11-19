@@ -4,18 +4,26 @@ const mysql = require("mysql2");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { AircraftProvider, ProviderError } = require("./services/aircraftProvider");
 
 // ================= APP SETUP =================
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,http://127.0.0.1:5500")
+  .split(",").map(origin => origin.trim()).filter(Boolean);
+app.use(cors({
+  origin(origin, callback) {
+    callback(null, !origin || allowedOrigins.includes(origin));
+  }
+}));
 app.use(express.json());
 app.use(express.static("public"));
 
-const SECRET = "supersecretkey";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error("JWT_SECRET must be set to a random value of at least 32 characters");
+}
 
-const fetch = globalThis.fetch || ((...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args)));
 
 // ================= DATABASE =================
 const db = mysql.createConnection({
@@ -35,6 +43,7 @@ db.connect(err => {
 });
 
 const PORT = process.env.PORT || 3000;
+const aircraftProvider = new AircraftProvider();
 
 // ================= AUTH MIDDLEWARE =================
 function authMiddleware(req, res, next) {
@@ -45,7 +54,7 @@ function authMiddleware(req, res, next) {
   const token = header.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch {
@@ -75,7 +84,7 @@ app.post("/login", (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, username: user.username },
-      SECRET,
+      JWT_SECRET,
       { expiresIn: "2h" }
     );
 
@@ -125,61 +134,23 @@ app.get("/aircraft-live/:lat/:lon/:range", async (req, res) => {
   try {
     const lat = Number(req.params.lat);
     const lon = Number(req.params.lon);
-    const rangeKm = Number(req.params.range);
+    const radiusNm = Number(req.params.range);
     if (!Number.isFinite(lat) || lat < -90 || lat > 90 ||
         !Number.isFinite(lon) || lon < -180 || lon > 180 ||
-        !Number.isFinite(rangeKm) || rangeKm <= 0) {
-      return res.status(400).json({ error: "Invalid latitude, longitude, or range" });
+        !Number.isFinite(radiusNm) || radiusNm < 1 || radiusNm > 250) {
+      return res.status(400).json({ error: "Latitude/longitude must be valid and range must be 1–250 NM" });
     }
 
-    // ADSB.lol's point endpoint takes nautical miles and caps radius at 250 nm.
-    const radiusNm = Math.min(250, Math.max(1, Math.round(rangeKm / 1.852)));
-    const response = await fetch(
-      `https://api.adsb.lol/v2/point/${lat}/${lon}/${radiusNm}`,
-      { headers: { Accept: "application/json", "User-Agent": "AircraftTracker/1.0 (+https://github.com/Vladimir333ds/web-app)" } }
-    );
-    const body = await response.text();
-    let data;
-
-    try {
-      if (!body.trim()) throw new Error("empty response");
-      data = JSON.parse(body);
-    } catch {
-      console.error(
-        `ADSB.lol response: HTTP ${response.status}, ` +
-        `content-type ${response.headers.get("content-type") || "unknown"}, ` +
-        `body: ${body.slice(0, 500) || "(empty)"}`
-      );
-      return res.status(502).json({
-        error: `Aircraft provider returned an invalid response (HTTP ${response.status})`
-      });
-    }
-
-    if (!response.ok) {
-      console.error(`ADSB.lol returned HTTP ${response.status}:`, body.slice(0, 500));
-      return res.status(502).json({
-        error: `Aircraft provider returned HTTP ${response.status}`
-      });
-    }
-    const aircraft = Array.isArray(data?.ac) ? data.ac : [];
-    res.json({
-      total: Number.isFinite(data?.total) ? data.total : aircraft.length,
-      aircraft: aircraft.filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon)).map(p => ({
-        icao: p.hex || "",
-        callsign: p.flight?.trim() || "",
-        lat: p.lat,
-        lon: p.lon,
-        heading: p.track ?? p.true_heading ?? 0,
-        baroAltitude: p.alt_baro,
-        speed: p.gs,
-        reg: p.r,
-        type: p.t
-      }))
-    });
-
+    const result = await aircraftProvider.findByPoint(lat, lon, Math.round(radiusNm));
+    res.set("Cache-Control", "no-store");
+    res.json(result);
   } catch (err) {
+    if (err instanceof ProviderError) {
+      if (err.retryAfter) res.set("Retry-After", err.retryAfter);
+      return res.status(err.status).json({ error: err.message });
+    }
     console.error("Aircraft provider request failed:", err.message);
-    res.status(502).json({ error: "Unable to reach the aircraft data provider" });
+    res.status(502).json({ error: "Aircraft data request failed" });
   }
 });
 
@@ -327,7 +298,7 @@ app.put("/edit-username", authMiddleware, (req, res) => {
 
     const newToken = jwt.sign(
       { id: req.user.id, username: newUsername },
-      SECRET,
+      JWT_SECRET,
       { expiresIn: "2h" }
     );
 
