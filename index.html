@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
   <link rel="stylesheet" href="./styles/base.css">
-  <link rel="stylesheet" href="./styles/map.css">
+  <link rel="stylesheet" href="./styles/map.css?v=atc-callout-3">
   <link rel="stylesheet" href="./styles/theme.css">
 </head>
 
@@ -192,11 +192,27 @@
     </div>
   </div>
 
-  <!-- Aircraft Details Panel -->
-  <div id="aircraftDetails" class="details hidden">
-    <button class="close" onclick="closeDetails()">✖</button>
-    <h3>Aircraft Details</h3>
-    <div id="detailsContent"></div>
+  <!-- Aircraft Details Modal -->
+  <div id="aircraftDetails" class="aircraft-details hidden" role="dialog" aria-modal="true"
+    aria-labelledby="detailsTitle" aria-hidden="true">
+    <div class="aircraft-details__backdrop" data-close-details></div>
+    <section class="aircraft-details__panel">
+      <header class="aircraft-details__header">
+        <div class="aircraft-details__heading">
+          <span class="aircraft-details__eyebrow"><i></i> AIRCRAFT PROFILE</span>
+          <h2 id="detailsTitle">Aircraft details</h2>
+          <p id="detailsSubtitle">Live aircraft information</p>
+        </div>
+        <button class="aircraft-details__close" type="button" onclick="closeDetails()" aria-label="Close aircraft details">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </header>
+      <dl id="detailsContent" class="aircraft-details__grid"></dl>
+      <footer class="aircraft-details__footer">
+        <span><i class="bi bi-broadcast-pin"></i> Live tracking data</span>
+        <span>Aircraft Tracker</span>
+      </footer>
+    </section>
   </div>
 
   <!-- Scripts -->
@@ -209,7 +225,7 @@
   <script src="js/config.js"></script>
   <script src="js/dom.js"></script>
   <script src="js/aircraft-api.js"></script>
-  <script src="js/map.js"></script>
+  <script src="js/map.js?v=atc-details-3"></script>
   <script src="js/theme.js"></script>
   <script src="js/auth.js"></script>
 
